@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Question to Vector/Vector to Answer Demo</title>
+    <script src="data/wordvecs25000.js"></script>
+    <!--<script src="assets/js/word2vecutils.js"></script>
+    <script src="assets/js/word2vecdemo.js"></script>-->
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
+    <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+    <script src="assets/js/word2vec2qna.js"></script>
+  </head>
+  <body>
+  <div style="margin:20px auto;width:600px;">
+    <h1>Word 2 Vec 2 QnA</h1>
+
+<p>
+<textarea id="markup" name="markup" style="width:100%;height:200px;border: solid 1px #aaa;"wrap="off">dog, animal
+tree, vegetable</textarea>
+<input id="upload" type="file"/>
+</p>
+
+<p>
+  <input type="button" value="Build Vectors" style="width:100%" onclick="make_vectors('markup');"/>
+</p>
+<p>
+  <div id="thinking"></div>
+</p>
+<p>
+    <input id="test" name="test" style="width:400px;" onkeypress="if (event.keyCode==13){test_understanding()}"/> <input type="button" value='Test "Understanding"' onclick="test_understanding()"/>
+  </p>
+  <p>
+    <div id="answers"></div>
+  </p>
+  <p>
+
+    <input type="button" value='Download .js File' onclick="download_vectors()"/>
+  </p>
+
+    </div>
+  </body>
+
+  <script type="text/javascript">
+
+  // h/t http://answers.splunk.com/answers/125819/fill-textarea-from-a-file.html
+   //External data file handling starts here
+   var control = document.getElementById("upload");
+       control.addEventListener("change", function(event){
+  		if (window.File && window.FileReader && window.FileList && window.Blob) {
+  			var reader = new FileReader();
+  			 reader.onload = function(event){
+  				 var contents = event.target.result;
+  				   document.getElementById('markup').value = contents;
+  			 };
+  			 reader.onerror = function(event){
+  				 console.error("File could not be read! Code " + event.target.error.code);
+  			 };
+  			 console.log("Filename: " + control.files[0].name);
+  			 reader.readAsText(control.files[0]);
+  		} else {
+  			alert('This feature is not supported by your browser.');
+  		}
+  	 }, false);
+
+     // h/t http://runnable.com/U5HC9xtufQpsu5aj/use-javascript-to-save-textarea-as-a-txt-file
+
+     function saveTextAsFile(textToWrite,name)
+     {
+
+     // I'm using file system support as a proxy for support for this feature.
+     // Check based on one found at: http://blog.teamtreehouse.com/building-an-html5-text-editor-with-the-filesystem-apis
+     // Handle vendor prefixes.
+     window.requestFileSystem = window.requestFileSystem ||
+                                window.webkitRequestFileSystem;
+     // Check for support.
+     if (window.requestFileSystem) {
+     //  create a new Blob (html5 magic) that conatins the data from your form feild
+         var textFileAsBlob = new Blob([textToWrite], {type:'text/plain'});
+
+     // Specify the name of the file to be saved
+         var fileNameToSaveAs = name;
+
+     // Optionally allow the user to choose a file name by providing
+     // an imput field in the HTML and using the collected data here
+     // var fileNameToSaveAs = txtFileName.text;
+
+     // create a link for our script to 'click'
+         var downloadLink = document.createElement("a");
+     //  supply the name of the file (from the var above).
+     // you could create the name here but using a var
+     // allows more flexability later.
+         downloadLink.download = fileNameToSaveAs;
+     // provide text for the link. This will be hidden so you
+     // can actually use anything you want.
+         downloadLink.innerHTML = "My Hidden Link";
+
+     // allow our code to work in webkit & Gecko based browsers
+     // without the need for a if / else block.
+         window.URL = window.URL || window.webkitURL;
+
+     // Create the link Object.
+         downloadLink.href = window.URL.createObjectURL(textFileAsBlob);
+     // when link is clicked call a function to remove it from
+     // the DOM in case user wants to save a second file.
+         downloadLink.onclick = destroyClickedElement;
+     // make sure the link is hidden.
+         downloadLink.style.display = "none";
+     // add the link to the DOM
+         document.body.appendChild(downloadLink);
+
+     // click the new link
+         downloadLink.click();
+     } else {
+     	alert('This feature is not supported by your browser. You could, however, cut-and-paste your text into an editor to save it.');
+     }
+
+     }
+
+     function destroyClickedElement(event)
+     {
+     // remove the link from the DOM
+         document.body.removeChild(event.target);
+     }
+
+     // h/t https://www.bennadel.com/blog/1504-ask-ben-parsing-csv-strings-with-javascript-exec-regular-expression-command.htm
+
+     // This will parse a delimited string into an array of
+     	// arrays. The default delimiter is the comma, but this
+     	// can be overriden in the second argument.
+     	function CSVToArray( strData, strDelimiter ){
+     		// Check to see if the delimiter is defined. If not,
+     		// then default to comma.
+     		strDelimiter = (strDelimiter || ",");
+
+     		// Create a regular expression to parse the CSV values.
+     		var objPattern = new RegExp(
+     			(
+     				// Delimiters.
+     				"(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+
+     				// Quoted fields.
+     				"(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+
+     				// Standard fields.
+     				"([^\"\\" + strDelimiter + "\\r\\n]*))"
+     			),
+     			"gi"
+     			);
+
+
+     		// Create an array to hold our data. Give the array
+     		// a default empty first row.
+     		var arrData = [[]];
+
+     		// Create an array to hold our individual pattern
+     		// matching groups.
+     		var arrMatches = null;
+
+
+     		// Keep looping over the regular expression matches
+     		// until we can no longer find a match.
+     		while (arrMatches = objPattern.exec( strData )){
+
+     			// Get the delimiter that was found.
+     			var strMatchedDelimiter = arrMatches[ 1 ];
+
+     			// Check to see if the given delimiter has a length
+     			// (is not the start of string) and if it matches
+     			// field delimiter. If id does not, then we know
+     			// that this delimiter is a row delimiter.
+     			if (
+     				strMatchedDelimiter.length &&
+     				(strMatchedDelimiter != strDelimiter)
+     				){
+
+     				// Since we have reached a new row of data,
+     				// add an empty row to our data array.
+     				arrData.push( [] );
+
+     			}
+
+
+     			// Now that we have our delimiter out of the way,
+     			// let's check to see which kind of value we
+     			// captured (quoted or unquoted).
+     			if (arrMatches[ 2 ]){
+
+     				// We found a quoted value. When we capture
+     				// this value, unescape any double quotes.
+     				var strMatchedValue = arrMatches[ 2 ].replace(
+     					new RegExp( "\"\"", "g" ),
+     					"\""
+     					);
+
+     			} else {
+
+     				// We found a non-quoted value.
+     				var strMatchedValue = arrMatches[ 3 ];
+
+     			}
+
+
+     			// Now that we have our value string, let's add
+     			// it to the data array.
+     			arrData[ arrData.length - 1 ].push( strMatchedValue );
+     		}
+
+     		// Return the parsed data.
+     		return( arrData );
+     	}
+
+
+
+  </script>
+</html>
