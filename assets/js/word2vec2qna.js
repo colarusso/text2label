@@ -174,13 +174,24 @@ function unknown_global(id) {
   }
   if (notfound.length > 0) {
     console.log("Words without vectors ("+notfound.length +"): "+ notfound);
+    console.log("Building custome vectors...");
+    if (notfound.length < 301) {
+      for(var i=0; i < notfound.length; i++) {
+         var empty_vect = Array(300).fill(0);
+         empty_vect[i] = 1
+         wordVecs[notfound[i]] = empty_vect
+      }
+    } else {
+      for(var i=0; i < 300; i++) {
+         var empty_vect = Array(300).fill(0);
+         empty_vect[i] = 1
+         wordVecs[notfound[i]] = empty_vect
+      }
+      console.log("Only the frist 300 unknown words were added.");
+    }
+    console.log("Done");
   }
 
-  for(var i=0; i < notfound.length; i++) {
-     var empty_vect = Array(300).fill(0);
-     empty_vect[i] = 1
-     wordVecs[notfound[i]] = empty_vect
-  }
 
   return notfound
 }
