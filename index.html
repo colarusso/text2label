@@ -22,7 +22,7 @@
 </br>
 <hr>
 <p>
-  This is not really a true text classifier, hence the quotes. It is a JavaScript-only implementation that mostly does the job. I needed a solution that would run on something like GitHub Pages (where you only can do client-side scripting). Anyhow, you start with a two-column CSV file. The first column contains example texts, and the second column contains labels for each text item. Below, I've used single words, but it can support sentences. Using these we build vectors based on the texts and associate them with their labels. Instead of using this as training data for an honest-to-goodness classifier, we just match the vectors of novel texts with existing examples, looking for the closest match.
+  This is not a true text classifier, hence the quotes. It is a JavaScript-only implementation that mostly does the job. I needed a solution that would run on something like GitHub Pages (where you only can do client-side scripting). Anyhow, you start with a two-column CSV file. The first column contains example texts, and the second column contains labels for each text item. Below, I've used single words, but it can support sentences. Using these we build vectors based on the texts and associate them with their labels. Instead of using this as training data for an honest-to-goodness classifier, we just match the vectors of novel texts with existing examples, looking for the closest match.
 </p>
 
 <h2>Build Vectors</h2>
