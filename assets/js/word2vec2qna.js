@@ -199,7 +199,7 @@ function unknown_global(id) {
         }
         wordVecs[notfound[i]] = empty_vect
       }
-      console.log("Only the frist 300 unknown words were added.");
+      console.log("Only the frist 600 unknown words were added.");
     }
     console.log("Done");
   }
