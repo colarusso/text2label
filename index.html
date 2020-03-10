@@ -22,12 +22,12 @@
 </br>
 <hr>
 <p>
-  This is not really a true text classifier, hence the quotes. It is a JavaScript-only implementation that mostly does the job. I needed a solution that would run on something like a GitHub Pages (where you only can do client-side scripting). Anyhow, you start with a two-column CSV file. The first column is an example of some text, and the second column is the label for each text item. Below, I've used single words, but it can support sentences. We then build vectors based on these texts and associate them with their labels. Instead of using this as training data for a honest-to-goodness classifier, we just match the vectors of novel texts with existing examples, looking for the closest match.
+  This is not really a true text classifier, hence the quotes. It is a JavaScript-only implementation that mostly does the job. I needed a solution that would run on something like GitHub Pages (where you only can do client-side scripting). Anyhow, you start with a two-column CSV file. The first column is an example of some text, and the second column is the label for each text item. Below, I've used single words, but it can support sentences. We then build vectors based on these texts and associate them with their labels. Instead of using this as training data for a honest-to-goodness classifier, we just match the vectors of novel texts with existing examples, looking for the closest match.
 </p>
 
 <h2>Build Vectors</h2>
 
-<p>Did you notice how this page took a while to load, well that's because it loaded a bunch of word vectors (used to vectorize your text). You may be able to get away with fewer words. So feel free to play around with the selections below. If you change this selection, however, you'll need to rebuild your vectors to see the results. Also, this page loaded almost 115 MB of word vectors. You'll be using only a subset of these regardless of what option you choose.</p>
+<p>Did you notice how this page took a while to load, well that's because it loaded a bunch of word vectors (used to vectorize your text). You may be able to get away with fewer words. So feel free to play around with the selections below. If you change this selection, however, you'll need to rebuild your vectors to see the results. Also, this page loaded almost 115 MB of word vectors. You'll be using only a subset of these regardless of what option you choose. Note: I orginally got these vectors from <a href="https://github.com/turbomaze/word2vecjson" target=_blank>word2vecjson</a>.</p>
 <select id="vcount" disabled=TRUE>
   <option value=25000>25,000 word vectors (~70 MB)</option>
   <option value=10000>10,000 word vectors (~28 MB)</option>
