@@ -3,20 +3,45 @@
   <head>
     <meta charset="utf-8">
     <title>Question to Vector/Vector to Answer Demo</title>
-    <script src="data/wordvecs25000.js"></script>
-    <!--<script src="assets/js/word2vecutils.js"></script>
-    <script src="assets/js/word2vecdemo.js"></script>-->
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
     <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
-    <script src="assets/js/word2vec2qna.js"></script>
   </head>
-  <body>
-  <div style="margin:20px auto;width:600px;">
-    <h1>Word 2 Vec 2 QnA</h1>
-
+<body style="margin:0;padding:0;">
+<div id="msg" style="position:absolute;top:0;z-index:100;width:100%;margin:0;">
+  <div style="margin:0 auto;max-width:300px;text-align:center;background:yellow;padding:15px;">
+  <b> Loading... This could take a moment.<br>
+  Or two. ;) </b>
+  </div>
+</div>
+<div style="margin:20px auto 100px auto;max-width:900px;">
+<center>
+  <h1>Text2Label: A Quick and Dirty Client-Side Text "Classifier"</h1>
+  By <a href="https://twitter.com/Colarusso" target=_blank>@colarusso</a>
+</center>
+</br>
+<hr>
 <p>
-<textarea id="markup" name="markup" style="width:100%;height:200px;border: solid 1px #aaa;"wrap="off">mammal, animal
+  This is not really a true text classifier, hence the quotes. It is a JavaScript-only implementation that mostly does the job. I needed a solution that would run on something like a GitHub page (where you only can do client-side scripting). Anyhow, you start with a two-column CSV file. The first column is an example of some text, and the second column is the label for each text item. Below, I've used single words, but it can support sentences. We then build vectors based on these texts and associate them with their labels. Instead of using this as training data for a honest-to-goodness classifier, we just match the vectors of novel texts with existing examples, looking for the closest match.
+</p>
+
+<h2>Build Vectors</h2>
+
+<p>Did you notice how this page took a while to load, well that's because it loaded a bunch of word vectors (used to vectorize your text). You may be able to get away with fewer words. So feel free to play around with the selections below. If you change this selection, however, you'll need to rebuild your vectors to see the results. Also, this page loaded almost 115 MB of word vectors. You'll be using only a subset of these regardless of what option you choose.</p>
+<select id="vcount" disabled=TRUE>
+  <option value=25000>25,000 word vectors (~70 MB)</option>
+  <option value=10000>10,000 word vectors (~28 MB)</option>
+  <option value=5000>5,000 word vectors (~14 MB)</option>
+  <option value=1000>1,000 word vectors (~3 MB)</option>
+</select>
+<p>
+  That being said, if you have words that aren't found in the list of word vectors, we'll make a placeholder vector for them. That is, we'll take the 300 dimensions of a word vector and set all of them to zero. The first unknown word will have the first dimension set to one, the second will have the second dimension set to one, and so on. This dosn't really capture any semantic info about these words, but it at least makes sure that they can be found. We added this feature mostly to catch terms of art and proper names.
+</p>
+<p>
+ You can either type your "training data" into the textarea below, or click "Choose File" to upload a CSV. After that, click "Build Vectors" and it will construct a set of vectors based on your text and associate them with their labels. If you change this content, you'll need to rebuild your vectors to see the results.
+</p>
+<p>
+<textarea id="markup" name="markup" style="width:100%;height:200px;border: solid 1px #aaa;"wrap="off"  disabled=TRUE>mammal, animal
 mouse, animal
 insect, animal
 fish, animal
@@ -41,29 +66,152 @@ keyboard, mineral
 rocket, mineral
 jewelry, mineral
 smoke, mineral</textarea>
-<input id="upload" type="file"/>
+<input id="upload" type="file" disabled=TRUE/>
 </p>
 
 <p>
-  <input type="button" value="Build Vectors" style="width:100%" onclick="make_vectors('markup');"/>
+  <input type="button" id="build" value="Build Vectors" style="width:100%" onclick="make_vectors('markup');"  disabled=TRUE/>
 </p>
 <p>
   <div id="thinking"></div>
 </p>
+
+<h2>Test "Understanding"</h2>
 <p>
-    <input id="test" name="test" style="width:400px;" onkeypress="if (event.keyCode==13){test_understanding()}"/> <input type="button" value='Test "Understanding"' onclick="test_understanding()"/>
-  </p>
-  <p>
-    <div id="answers"></div>
-  </p>
-  <p>
+  Test things out and see if you need more examples. You can then download the two JavaScript files below, and use their functions to find the best match. Again, to find this match, the files vectorize some string of text and try to find the most similar item in the list of vectors you built above. It does this using cosine similarity.
+</p>
+<p>
+  <input id="test" name="test" style="width:400px;" onkeypress="if (event.keyCode==13){test_understanding()}"  disabled=TRUE/> <input id="test_button" type="button" value='Test "Understanding"' onclick="test_understanding()"  disabled=TRUE/>
+</p>
+<p>
+  <div id="answers"></div>
+</p>
+<p>Note: Not all browsers support the download feature. You may want to use Chrome.</p>
+<p>
+  <input id="file1" type="button" value='Download word2vect.js File' onclick="download_word_vectors()"  disabled=TRUE/>
+  <input id="file2" type="button" value='Download text2label.js File' onclick="download_question_vectors()"  disabled=TRUE/>
+</p>
 
-    <input type="button" value='Download .js File' onclick="download_vectors()"/>
-  </p>
 
-    </div>
-  </body>
+<h2>Demonstration</h2>
+<p>
+  To use your vectors and run a match like that above, you'll need both the "word2vec.js" and "text2label.js" files. For an example of how to use these, look at the code below or check it out in action <a href="demo/" target=_blank>here</a>.
+</p>
 
+<pre style="background:black;color:white;padding:5px;overflow-x:scroll;"><code>&lt;html>
+  &lt;head>
+    &lt;script src="js/word2vec.js">&lt;/script>
+    &lt;script src="js/text2label.js">&lt;/script>
+    &lt;script>
+      function test_understanding(string) {
+      // This function makes use of text2lable to find the best answer
+          answers = getNClosestAnswer(1, vectorize(string))
+          // getNClosestAnswer allows for the return of multiple labels
+          // here we've limited it to one. Additionally, we're filtering by
+          // QLabels to apply consistent labels. To allow for multiple instances
+          // of the same labels we append a #n to the label. This removes that.
+          document.getElementById('answer').innerHTML = QLabels[answers[0][0]]
+      }
+    &lt;/script>
+  &lt;/head>
+  &lt;body>
+    &lt;input id="test" style="width:300px;" onkeypress="if (event.keyCode==13){test_understanding('test')}"/>
+    &lt;input type="button" value='Get label' onclick="test_understanding(document.getElementById('test').value)"/>
+    &lt;p id="answer">&lt;/p>
+  &lt;/body>
+&lt;/html>
+</code></pre>
+
+<hr>
+<font size=-1><a href="https://github.com/colarusso/text2label" target=_blank>GitHub Repo</a></font>
+
+
+<textarea id="code" name="code" style="display:none;" wrap="off">
+  /*-----------------------------------------------------------------
+
+       FUNCTIONS FROM https://github.com/turbomaze/word2vecjson
+
+  -----------------------------------------------------------------*/
+
+  function getCosSim(f1, f2) {
+    return Math.abs(f1.reduce(function(sum, a, idx) {
+      return sum + a*f2[idx];
+    }, 0)/(mag(f1)*mag(f2))); //magnitude is 1 for all feature vectors
+  }
+
+  function mag(a) {
+    return Math.sqrt(a.reduce(function(sum, val) {
+      return sum + val*val;
+    }, 0));
+  }
+
+  function norm(a) {
+    var a_mag = mag(a);
+    return a.map(function(val) {
+      return val/a_mag;
+    });
+  }
+
+  /*-----------------------------------------------------------------
+
+       NEW FUNCTIONS
+
+  -----------------------------------------------------------------*/
+  var QVecs;
+  var QLabels;
+
+  function vectorize(string){
+    // get a list of words
+    words = string.replace(/[^a-zA-Z\s]+/g,'').replace(/\s{2,}/g,' ').toLowerCase().trim().split(" ");
+    var vector = [];
+    var usable_words = 0;
+    var found = []
+    var notfound = []
+    // get the vector for each word
+    for (i = 0, len = words.length, text = ""; i < len; i++) {
+      // only do this if the word is in our list
+      if (wordVecs.hasOwnProperty(words[i])) {
+        found.push(words[i]);
+        //console.log(wordVecs[words[i]]);
+        if (usable_words==0) {
+          vector = wordVecs[words[i]]
+        } else {
+          // average the word vectors
+          for (j = 0; j < 300; j++) {
+            vector[j] = vector[j] + wordVecs[words[i]][j];
+          }
+        }
+        usable_words += 1
+      } else {
+        notfound.push(words[i]);
+      }
+    }
+
+    for (j = 0; j < 300; j++) {
+      vector[j] = vector[j]/usable_words;
+    }
+    // return a best-guess vector for the string
+    return norm(vector);
+  }
+
+
+  function getNClosestAnswer(n, vec) {
+    var sims = [];
+    for (var ans in QVecs) {
+      var sim = getCosSim(vec, QVecs[ans]);
+      sims.push([ans, sim]);
+    }
+    sims.sort(function(a, b) {
+      return b[1] - a[1];
+    });
+    return sims.slice(0, n);
+  }
+
+</textarea>
+
+</div>
+</body>
+  <script src="assets/js/text2label.js"></script>
   <script type="text/javascript">
 
   // h/t http://answers.splunk.com/answers/125819/fill-textarea-from-a-file.html
@@ -232,8 +380,21 @@ smoke, mineral</textarea>
      		// Return the parsed data.
      		return( arrData );
      	}
-
-
-
   </script>
+  <script src="data/wordvecs25000.js"></script>
+  <script src="data/wordvecs10000.js"></script>
+  <script src="data/wordvecs5000.js"></script>
+  <script src="data/wordvecs1000.js"></script>
+  <script>
+    $( "#vcount" ).prop( "disabled", false );
+    $( "#markup" ).prop( "disabled", false );
+    $( "#upload" ).prop( "disabled", false );
+    $( "#build" ).prop( "disabled", false );
+    $( "#test" ).prop( "disabled", false );
+    $( "#test_button" ).prop( "disabled", false );
+    $( "#file1" ).prop( "disabled", false );
+    $( "#file2" ).prop( "disabled", false );
+    $('#msg').hide();
+  </script>
+
 </html>
