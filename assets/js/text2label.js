@@ -79,17 +79,20 @@ function vectorize(string){
 
 function make_vectors(id) {
   console.log("Building vectors...");
-  $('#thinking').html("<span style='background:yellow'><b>Thinking...</b></span>")
+  $('#thinking').html("<p style='background:yellow;padding:15px;'><b>Thinking...</b></p>");
+  $('#notes').html("")
 
   if ($('#vcount').find(":selected").val() == 25000) {
-    wordVecs = wordVecs25000
+    wordVecs = $.extend(true,{},wordVecs25000);
   } else if ($('#vcount').find(":selected").val() == 10000) {
-    wordVecs = wordVecs10000
+    wordVecs = $.extend(true,{},wordVecs10000);
   } else if ($('#vcount').find(":selected").val() == 5000) {
-    wordVecs = wordVecs5000
+    wordVecs = $.extend(true,{},wordVecs5000);
   } else if ($('#vcount').find(":selected").val() == 1000) {
-    wordVecs = wordVecs1000
+    wordVecs = $.extend(true,{},wordVecs1000);
   }
+
+  console.log("word2vec length: "+Object.keys(wordVecs).length);
 
   unknown_global(id)
 
@@ -103,7 +106,7 @@ function make_vectors(id) {
   }
   QVecs = ValuesToWrite
   QLabels = LabelsToWrite
-  $('#thinking').html("Your vectors are done.")
+  $('#thinking').html("<p style='background:#ddffdd;padding:15px;'><b>Your vectors are ready.</b></p>")
   console.log("Done");
 }
 
@@ -201,7 +204,10 @@ function unknown_global(id) {
      notfound = notfound.filter((item, pos) => notfound.indexOf(item) === pos)
   }
   if (notfound.length > 0) {
-    console.log("Words without vectors ("+notfound.length +"): "+ notfound);
+    console.log("Words without vectors ("+notfound.length +"): "+ notfound.join(', '));
+
+    notes = "<p>The following "+notfound.length+" word(s) couldn't be found in the word vectors selected above:</p><p><li>"+notfound.join('</li><li>')+"</li></p><p>To make up for this, we've created placeholder vectors. These aren't as good as the real thing though. If they're really important  to your use case, consider upping the number of word vectors if that's an option.</p>"
+
     console.log("Building custome vectors...");
     if (notfound.length < 601) {
       for(var i=0; i < notfound.length; i++) {
@@ -226,7 +232,10 @@ function unknown_global(id) {
         wordVecs[notfound[i]] = empty_vect
       }
       console.log("Only the frist 600 unknown words were added.");
+      notes = notes + "<p>Note: we could only make placeholders for the frist 600 words.</p>"
     }
+    $('#notes').html("<div style='background:#ffffdd;padding:8px 15px;'>" + $('#notes').html() + notes + "</div>")
+    console.log("word2vec length: "+Object.keys(wordVecs).length);
     console.log("Done");
   }
   return notfound
