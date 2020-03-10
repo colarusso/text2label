@@ -206,7 +206,7 @@ function unknown_global(id) {
   if (notfound.length > 0) {
     console.log("Words without vectors ("+notfound.length +"): "+ notfound.join(', '));
 
-    notes = "<p>The following "+notfound.length+" word(s) couldn't be found in the word vectors selected above:</p><p><li>"+notfound.join('</li><li>')+"</li></p><p>To make up for this, we've created placeholder vectors. These aren't as good as the real thing though. If they're really important  to your use case, consider upping the number of word vectors if that's an option.</p>"
+    notes = "<p>The following "+notfound.length+" word(s) weren't found in the word vectors selected above:</p><p><li>"+notfound.join('</li><li>')+"</li></p><p>To make up for this, we've created placeholder vectors. These aren't as good as the real thing though. If they're really important  to your use case, consider upping the number of word vectors if that's an option.</p>"
 
     console.log("Building custome vectors...");
     if (notfound.length < 601) {
