@@ -35,10 +35,10 @@
   <option value=1000>1,000 word vectors (~3 MB)</option>
 </select>
 <p>
-  That being said, if you have words that aren't found in the list of word vectors, we'll make a placeholder vector for them. That is, we'll take the 300 dimensions of a word vector and set all of them to zero. The first unknown word will have the first dimension set to one, the second will have the second dimension set to one, and so on. This dosn't really capture any semantic info about these words, but it at least makes sure that they can be found. We added this feature mostly to catch terms of art and proper names.
+  That being said, if you have words that aren't found in the list of word vectors, we'll make a placeholder vector for them. That is, we'll take the 300 dimensions of a word vector and set all of them to zero. The first unknown word will have the first dimension set to one, the second will have the second dimension set to one, and so on. This doesn't capture any semantic info about these words, but at least it makes sure that these words are considered during matching. We added this feature mostly to catch terms of art and proper names.
 </p>
 <p>
- You can either type your "training data" into the textarea below, or click "Choose File" to upload a CSV. After that, click "Build Vectors" and it will construct a set of vectors based on your text and associate them with their labels. If you change this content, you'll need to rebuild your vectors to see the results.
+ You can type your "training data" into the textarea below, or click "Choose File" to upload a CSV. After that, click "Build Vectors," and it will construct a set of vectors based on your texts and associate them with their labels. If you change this content, you'll need to rebuild your vectors to see the results.
 </p>
 <p>
 <textarea id="markup" name="markup" style="width:100%;height:200px;border: solid 1px #aaa;"wrap="off"  disabled=TRUE>mammal, animal
@@ -79,7 +79,7 @@ smoke, mineral</textarea>
 
 <h2>Test "Understanding"</h2>
 <p>
-  Test things out and see if you need more examples. You can then download the two JavaScript files below, and use their functions to find the best match. Again, to find this match, the files vectorize some string of text and try to find the most similar item in the list of vectors you built above. It does this using cosine similarity.
+  Test things out and see if you need more examples. Once you're happy, download the two JavaScript files below, and use their functions to find the best match. Again, to find this match, the files vectorize some string of text and try to find the most similar item in the list of vectors you built above. It does this using cosine similarity.
 </p>
 <p>
   <input id="test" name="test" style="width:400px;" onkeypress="if (event.keyCode==13){test_understanding()}"  disabled=TRUE/> <input id="test_button" type="button" value='Test "Understanding"' onclick="test_understanding()"  disabled=TRUE/>
