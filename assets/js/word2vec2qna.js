@@ -78,6 +78,7 @@ function vectorize(string){
 }
 
 function make_vectors(id) {
+  console.log("Building vectors...");
   $('#thinking').html("<span style='background:yellow'><b>Thinking...</b></span>")
 
   unknown_global(id)
@@ -93,6 +94,7 @@ function make_vectors(id) {
   QVecs = ValuesToWrite
   QLabels = LabelsToWrite
   $('#thinking').html("Your vectors are done.")
+  console.log("Done");
 }
 
 function download_vectors() {
@@ -129,7 +131,7 @@ function test_understanding() {
       if (i==0){
         most_sim = answers[i][1]
       }
-      if (!isNaN(answers[i][1]) && ((most_sim-answers[i][1])/((most_sim+answers[i][1])/2))<0.25 ) {
+      if (!isNaN(answers[i][1])) {
         if (!label_list.includes(QLabels[answers[i][0]])) {
           label_list.push(QLabels[answers[i][0]])
           refined_ans[good_ans] = [QLabels[answers[i][0]],answers[i][1]]
@@ -175,23 +177,31 @@ function unknown_global(id) {
   if (notfound.length > 0) {
     console.log("Words without vectors ("+notfound.length +"): "+ notfound);
     console.log("Building custome vectors...");
-    if (notfound.length < 301) {
+    if (notfound.length < 601) {
       for(var i=0; i < notfound.length; i++) {
-         var empty_vect = Array(300).fill(0);
-         empty_vect[i] = 1
+         if (i<300) {
+           var empty_vect = Array(300).fill(0);
+           empty_vect[i] = 1
+         } else {
+           var empty_vect = Array(300).fill(1);
+           empty_vect[i-300] = 0
+         }
          wordVecs[notfound[i]] = empty_vect
       }
     } else {
-      for(var i=0; i < 300; i++) {
-         var empty_vect = Array(300).fill(0);
-         empty_vect[i] = 1
-         wordVecs[notfound[i]] = empty_vect
+      for(var i=0; i < 601; i++) {
+        if (i<300) {
+          var empty_vect = Array(300).fill(0);
+          empty_vect[i] = 1
+        } else {
+          var empty_vect = Array(300).fill(1);
+          empty_vect[i-300] = 0
+        }
+        wordVecs[notfound[i]] = empty_vect
       }
       console.log("Only the frist 300 unknown words were added.");
     }
     console.log("Done");
   }
-
-
   return notfound
 }
