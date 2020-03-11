@@ -1,5 +1,7 @@
 <html>
   <head>
+    <!-- Include the following line only if you're writing data to AitTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
     <script src="js/word2vec.js"></script>
     <script src="js/text2label.js"></script>
     <script>
@@ -11,6 +13,8 @@
         // QLabels to apply consistent labels. To allow for multiple instances
         // of the same labels we append a #n to the label. This removes that.
         document.getElementById('answer').innerHTML = QLabels[answers[0][0]]
+        // Include the following line only if you're writing data to AitTable
+        write_to_table(string,QLabels[answers[0][0]])
       }
     </script>
   </head>

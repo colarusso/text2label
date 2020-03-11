@@ -5,13 +5,12 @@
     <title>Text2Label: A Quick and Dirty Client-Side Text "Classifier"</title>
     <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
     <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
-    <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js"></script>
   </head>
 <body style="margin:0;padding:0;">
 <div id="msg" style="position:absolute;top:0;z-index:100;width:100%;margin:0;">
-  <div style="margin:0 auto;max-width:300px;text-align:center;background:yellow;padding:15px;">
-  <b> Loading... This could take a moment.<br>
-  Or two. ;) </b>
+  <div style="margin:0 auto;max-width:400px;text-align:center;background:yellow;padding:15px;">
+  <b> Loading... This could take a moment or three. ;) </b>
   </div>
 </div>
 <div style="margin:20px auto 100px auto;max-width:900px;">
@@ -76,6 +75,15 @@ smoke, mineral</textarea>
   <div id="notes"></div>
 </p>
 
+
+<h2>Data Collection (Optional)</h2>
+<p>It might be nice to see what text people are trying to classify, along with the answers they are getting, but since we're trying to run this on a server without server-side scripting or a database, we need to get creative. So I added this <a href="https://airtable.com/" target=_blank>AirTable</a> hack. Basically, you create an AirTable and use there API to add a row for every user text. If you leave any of the following three fields blank, this functionality will not be added to your code. If you want to use AirTable in this way, just add the relevant info. Keep in mind these will all be visible to your end users should the inspect the code.</p>
+
+API Key: <input id="api_key" style="width:150px;" disabled=TRUE value=""/>&nbsp;&nbsp;
+Base ID: <input id="base_id" style="width:150px;" disabled=TRUE value=""/>&nbsp;&nbsp;
+Table Name: <input id="table_name" style="width:100px;" disabled=TRUE value=""/>
+
+
 <h2>Test "Understanding"</h2>
 <p>
   Test things out and see if you need more examples. Once you're happy, download the two JavaScript files below, and use their functions to find the best match. Again, to find this match, the files vectorize some string of text and try to find the most similar item in the list of vectors you built above. It does this using cosine similarity.
@@ -86,6 +94,8 @@ smoke, mineral</textarea>
 <p>
   <div id="answers"></div>
 </p>
+
+<h2>Download Your Custom Code</h2>
 <p>Note: Not all browsers support the download feature. You may want to use <a href="https://www.google.com/chrome/" target=_blank>Chrome</a>. This is only an issue for the download feature on this page, not the code you are downloading. It should work across browsers.</p>
 <p>
   <input id="file1" type="button" value='Download word2vec.js File' onclick="download_word_vectors()"  disabled=TRUE/>
@@ -95,11 +105,13 @@ smoke, mineral</textarea>
 
 <h2>Demo Code</h2>
 <p>
-  To use your vectors and run a match like that above, you'll need both the "word2vec.js" and "text2label.js" files. For an example of how to use these, look at the code below. Then check it out <a href="demo/" target=_blank>in action</a>. FYI, the demo uses vectors built on the default Animal, Vegetable, or Mineral data you saw when this page first loaded.
+  To use your vectors and run a match like that above, you'll need both the "word2vec.js" and "text2label.js" files. For an example of how to use these, look at the code below. Then check it out <a href="demo/" target=_blank>in action</a>. FYI, the demo uses vectors built on the default Animal, Vegetable, or Mineral data you saw when this page first loaded. Also, you may want to move the src calls to the end of the page so they don't hold up loading.
 </p>
 
 <pre style="background:black;color:white;padding:5px;overflow-x:scroll;"><code>&lt;html>
   &lt;head>
+    <span style="color:red">&lt;!-- Include the following line only if you're writing data to AitTable -->
+    &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.16.2/axios.min.js">&lt;/script> </span>
     &lt;script src="js/word2vec.js">&lt;/script>
     &lt;script src="js/text2label.js">&lt;/script>
     &lt;script>
@@ -111,6 +123,8 @@ smoke, mineral</textarea>
           // QLabels to apply consistent labels. To allow for multiple instances
           // of the same labels we append a #n to the label. This removes that.
           document.getElementById('answer').innerHTML = QLabels[answers[0][0]]
+          <span style="color:red">// Include the following line only if you're writing data to AitTable
+          write_to_table(string,QLabels[answers[0][0]])</span>
       }
     &lt;/script>
   &lt;/head>
@@ -208,6 +222,25 @@ smoke, mineral</textarea>
   }
 
 </textarea>
+
+<textarea id="code_w_airtable" name="code_w_airtable" style="display:none;" wrap="off">
+
+  function write_to_table(text,label) {
+  		apicall = "https://api.airtable.com/v0/"+base_id+"/"+table_name+"/";
+  		axios.post(
+  		 	apicall,
+  			{"fields":{"text":text,"label":label}},
+        {headers: { Authorization: "Bearer "+ api_key}}
+      ).then(function(response){
+        console.log("Wrote to AirTable")
+      }).catch(function(error){
+      	console.log(error)
+      	alert("There was a problem writing to your Airtable ("+error+"). Check your credenials et al.");
+      })
+  }
+
+</textarea>
+
 
 </div>
 </body>
@@ -381,10 +414,11 @@ smoke, mineral</textarea>
      		return( arrData );
      	}
   </script>
-  <script src="data/wordvecs25000.js"></script>
-  <script src="data/wordvecs10000.js"></script>
+<script src="data/wordvecs10000.js"></script>
+  <!--<script src="data/wordvecs25000.js"></script>
+
   <script src="data/wordvecs5000.js"></script>
-  <script src="data/wordvecs1000.js"></script>
+  <script src="data/wordvecs1000.js"></script>-->
   <script>
     $( "#vcount" ).prop( "disabled", false );
     $( "#markup" ).prop( "disabled", false );
@@ -392,6 +426,9 @@ smoke, mineral</textarea>
     $( "#build" ).prop( "disabled", false );
     $( "#test" ).prop( "disabled", false );
     $( "#test_button" ).prop( "disabled", false );
+    $( "#api_key" ).prop( "disabled", false );
+    $( "#base_id" ).prop( "disabled", false );
+    $( "#table_name" ).prop( "disabled", false );
     $( "#file1" ).prop( "disabled", false );
     $( "#file2" ).prop( "disabled", false );
     $('#msg').hide();

@@ -123,11 +123,36 @@ function download_question_vectors() {
   if (QVecs == null) {
       alert("You must build vectors before downloading files.")
   } else {
-    textToWrite =  document.getElementById('code').value + "\n"
+    if ($( "#api_key" ).val() != "" && $( "#base_id" ).val() != "" && $( "#table_name" ).val() != "") {
+      textToWrite =  "var api_key = '"+$( "#api_key" ).val() + "';\n"
+      textToWrite =  textToWrite + "var base_id = '"+$( "#base_id" ).val() + "';\n"
+      textToWrite =  textToWrite + "var table_name = '"+$( "#table_name" ).val() + "';\n"
+      textToWrite =  textToWrite + document.getElementById('code_w_airtable').value + "\n"
+      textToWrite =  textToWrite + document.getElementById('code').value + "\n"
+    } else {
+      textToWrite =  document.getElementById('code').value + "\n"
+    }
     textToWrite =  textToWrite + "var QVecs = "+JSON.stringify(QVecs) + "\n"
     textToWrite =  textToWrite + "var QLabels = "+JSON.stringify(QLabels) + "\n"
     saveTextAsFile(textToWrite,'text2label.js');
   }
+}
+
+function write_to_table(text,label) {
+		base_id = $( "#base_id" ).val().trim();
+		api_key = $( "#api_key" ).val().trim();
+		table_name = $( "#table_name" ).val().trim();
+		apicall = "https://api.airtable.com/v0/"+base_id+"/"+table_name+"/";
+		axios.post(
+		 	apicall,
+			{"fields":{"text":text,"label":label}},
+      {headers: { Authorization: "Bearer "+ api_key}}
+    ).then(function(response){
+      console.log("Wrote to AirTable")
+    }).catch(function(error){
+    	console.log(error)
+    	alert("There was a problem writing to your Airtable ("+error+"). Check your credenials et al.");
+    })
 }
 
 
@@ -152,12 +177,15 @@ function test_understanding() {
     answers = getNClosestAnswer(20, vectorize(string))
     refined_ans = []
 
-    var table = "<h2>Potential Matches:</h2><table border='1px' cellpadding='5px'><tr><td><b>Label</b></td><td><b> Cosine Similarity</b></td></tr>"
+    var table = "<h3>Potential Matches:</h3><table border='1px' cellpadding='5px'><tr><td><b>Label</b></td><td><b> Cosine Similarity</b></td></tr>"
     label_list = []
     most_sim = 0
     for(var i=0; i < answers.length; i++) {
       if (i==0){
         most_sim = answers[i][1]
+        if ($( "#api_key" ).val() != "" && $( "#base_id" ).val() != "" && $( "#table_name" ).val() != "") {
+            write_to_table(string,QLabels[answers[i][0]])
+        }
       }
       if (!isNaN(answers[i][1])) {
         if (!label_list.includes(QLabels[answers[i][0]])) {
