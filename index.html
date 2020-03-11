@@ -35,7 +35,7 @@
   <option value=1000>1,000 word vectors (~3 MB)</option>
 </select>
 <p>
-  That being said, if you have words that aren't found in the list of word vectors, we'll make a placeholder vector for them. That is, we'll take the 300 dimensions of a word vector and set all of them to zero. The first unknown word will have the first dimension set to one, the second will have the second dimension set to one, and so on. This doesn't capture any semantic info about these words, but at least it makes sure that these words are considered during matching. We added this feature mostly to catch terms of art and proper names.
+  That being said, if you have words that aren't found in the list of word vectors, we'll make a placeholder vector for them. That is, we'll take the 300 dimensions of a word vector and set all of them to zero. The first unknown word will have the first dimension set to one, the second will have the second dimension set to one, and so on through 300. We do the inverse for the next 300 unknown words, with all but a single dimension being one. This doesn't capture semantic info about these words, but it makes sure they are considered during matching. We added this feature mostly to catch terms of art and proper names.
 </p>
 <p>
  You can type your "training data" into the textarea below, or click "Choose File" to upload a CSV. After that, click "Build Vectors," and it will construct a set of vectors based on your texts and associate them with their labels. If you change this content, you'll need to rebuild your vectors to see the results.
